@@ -1,0 +1,151 @@
+query getDemarche($demarcheNumber: Int!) {
+    demarche(number: $demarcheNumber) {
+        id
+        dossiers
+        {
+            nodes
+            {
+                id
+                demandeur
+                {
+                    ... on PersonnePhysique { civilite nom prenom }
+                    ... on PersonneMorale { siret }
+                }
+                geojson {
+                    ...FileFragment
+                }
+                champs {
+                    ...ChampFragment
+                    ...RootChampFragment
+                }
+
+            }
+        }
+    }
+}
+
+fragment RootChampFragment on Champ {
+  ... on RepetitionChamp {
+      champs {
+      ...ChampFragment
+      }
+  }
+  ... on SiretChamp {
+      etablissement {
+      ...PersonneMoraleFragment
+      }
+  }
+  ... on CarteChamp {
+      geoAreas {
+      ...GeoAreaFragment
+      }
+  }
+  ... on DossierLinkChamp {
+      dossier {
+      id
+      state
+      usager {
+          email
+      }
+      }
+  }
+}
+
+fragment GeoAreaFragment on GeoArea {
+    id
+    source
+    description
+    geometry {
+        type
+        coordinates
+    }
+    ... on ParcelleCadastrale {
+        commune
+        numero
+        section
+        prefixe
+        surface
+    }
+}
+
+fragment ChampFragment on Champ {
+    __typename
+    id
+    label
+    stringValue
+    updatedAt
+    ... on DateChamp {
+        date
+    }
+    ... on DatetimeChamp {
+        datetime
+    }
+    ... on CheckboxChamp {
+        checked: value
+    }
+    ... on DecimalNumberChamp {
+        decimalNumber: value
+    }
+    ... on IntegerNumberChamp {
+        integerNumber: value
+    }
+    ... on CiviliteChamp {
+        civilite: value
+    }
+    ... on LinkedDropDownListChamp {
+        primaryValue
+        secondaryValue
+    }
+    ... on MultipleDropDownListChamp {
+        values
+    }
+    ... on AddressChamp {
+        address {
+        ...AddressFragment
+        }
+    }
+    ... on PieceJustificativeChamp {
+        files {
+            ...FileFragment
+            }
+        }
+    ... on CommuneChamp {
+        commune {
+        name
+        code
+        }
+        departement {
+        name
+        code
+        }
+    }
+}
+
+fragment PersonneMoraleFragment on PersonneMorale {
+    siret
+    siegeSocial
+    naf
+    libelleNaf
+}
+
+fragment AddressFragment on Address {
+    label
+    type
+    streetAddress
+    streetNumber
+    streetName
+    postalCode
+    cityName
+    cityCode
+    departmentName
+    departmentCode
+    regionName
+    regionCode
+}
+
+fragment FileFragment on File {
+    url
+    filename
+    contentType
+    byteSizeBigInt
+}
